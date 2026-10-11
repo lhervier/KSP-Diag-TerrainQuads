@@ -19,15 +19,9 @@ each quad, and the source is a few hundred lines with no dependency of any kind.
 
 ## What it shows
 
-Around the active craft, the terrain is made of quads of the highest level; further away, of coarser
-ones. Where the two meet, the finer quad leaves out every other vertex of its edge, and the ones it
-keeps should land on the vertices of the coarser edge. The mod draws the triangles of both quads along
-that seam, marks with a yellow line the shared vertex where they are furthest apart, and logs the gaps:
-their mean, the largest one, and how much of it is a step up or down and how much a gap beside. The
-buttons of a small window switch between the whole drawing, the yellow line alone, and nothing; its *Log*
-button writes, to two files, the distance from the centre of the body to every vertex of every quad
-around the craft. Why the vertices the two quads share do not always land on the same point, even in
-stock, is in the same chapter.
+Where quads of the highest level meet coarser ones, the mod draws the triangles of both along the seam,
+marks with a yellow line where they are furthest apart, and logs the gaps. Its *Log* button writes how
+far every vertex around the craft is from the centre of the body.
 
 ![The drawing seen from 10 km above a landed capsule: a green band inside, a red band outside, all around the zone of the highest level](imgs/drawing-kerbin.png)
 
