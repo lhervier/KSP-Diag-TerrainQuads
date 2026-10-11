@@ -59,15 +59,6 @@ takes looking for.
 
 **→ [The protocol](docs/the-protocol-seam.md) · [The measurements](docs/the-measurements-seam.md) · [What they show](docs/what-the-measurements-show-seam.md)**
 
-## Measured campaigns
-
-This instrument reads the quads in the campaigns of
-[Terrain Precision Fix](https://github.com/lhervier/KSP-TerrainPrecisionFix), each played without that
-mod and with it, with its protocol, its saves, its scripts and its logs:
-[the quads of the highest level, in flight](https://github.com/lhervier/KSP-TerrainPrecisionFix/blob/main/docs/checking-the-culprit-flight/the-ground.md), and
-[the seam between subdivision levels](https://github.com/lhervier/KSP-TerrainPrecisionFix/blob/main/docs/limits-and-solutions/stock/the-seam-between-subdivision-levels.md),
-measured again with that mod. The figures read with it are on those pages.
-
 ## Get it
 
 Either way you end up with the same `GameData/KSPDiagTerrainQuads/` folder.

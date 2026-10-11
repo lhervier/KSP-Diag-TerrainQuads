@@ -39,9 +39,7 @@ craft whatever it does, and a craft cannot be driven up to it.
 
 ## Why the shared vertices do not meet
 
-The game places every terrain vertex in two steps, in `PQS.BuildVertexSurfaceRelative` (the whole
-method, and why it rounds, is on
-[the page of Terrain Precision Fix](https://github.com/lhervier/KSP-TerrainPrecisionFix/blob/main/docs/the-culprit-ground.md)):
+The game places every terrain vertex in two steps, in `PQS.BuildVertexSurfaceRelative`:
 
 ```csharp
 planetRel = base.transform.TransformPoint(vertRel);
