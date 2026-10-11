@@ -14,10 +14,12 @@ namespace com.github.lhervier.ksp.diag.terrainquads
     internal static class McpTools
     {
         [McpTool("terrainquads_read",
-            "Reads KSP Diag - Terrain Quads: how many seams, the last line it logged and whether that line followed " +
-                "a shift of the origin, and for the largest gap the latitude, longitude, height above sea level " +
-                "and underSea of its vertex, gapMm, verticalMm, horizontalMm, finerAbove (whether the finer quad " +
-                "stands above the coarser one), distanceKm and headingFromVessel from the active vessel.")]
+            "Reads KSP Diag - Terrain Quads, as its window shows it: body, level (the highest), sideVertices, seams, " +
+                "fineQuads, coarseQuads, sharedVertices, noCounterpart, meanGapMm, maxGapMm, and for the largest gap " +
+                "gapMm, verticalMm, finerAbove (whether the finer quad stands above the coarser one), horizontalMm, " +
+                "the latitude, longitude, height above sea level (altitude) and underSea of its vertex, fineQuad, " +
+                "fineSide, coarseQuad, coarseSide, coarseLevel, distanceKm and headingFromVessel from the active " +
+                "vessel. Empty while the body of the active vessel has no terrain.")]
         internal static object Read()
         {
             return Mod().Reading();

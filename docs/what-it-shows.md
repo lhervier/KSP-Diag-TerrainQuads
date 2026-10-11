@@ -1,7 +1,7 @@
 # What it shows
 
-Part of [KSP Diag - Terrain Quads](../README.md): the seam between two subdivision levels and why its
-two sides do not meet, what the mod draws over it, what it writes to the log, and what its *Log* button writes to its two files.
+Part of [KSP Diag - Terrain Quads](../README.md): the seam between two subdivision levels, what the mod
+draws over it, what its window says of it, and what its *Log* button writes to its two files.
 
 ## The seam
 
@@ -25,56 +25,9 @@ The finer edge then runs along the same segments as the coarser one — provided
 share land on the same point. The triangles this mod draws are these ones, along the edges of both
 quads.
 
-They do not always land on the same point, even in stock. Where they do not, the edge of the finer
-quad runs a little above or below the edge of the coarser one, and nothing joins the two: the terrain
-has a step, and a crack along the seam.
-
-![A side view across the edge between a coarser quad and a quad of the highest level: the two lines of terrain do not meet at the edge, leaving a step between them](../imgs/step.svg)
-
-How far apart they are, load after load, is in [The measurements](the-measurements-seam.md).
-
 The quads of the highest level follow the active craft: as it moves, the quads ahead of it are split
 and the ones far behind it are merged back. The seam therefore stays about the same distance from the
 craft whatever it does, and a craft cannot be driven up to it.
-
-## Why the shared vertices do not meet
-
-The game places every terrain vertex in two steps, in `PQS.BuildVertexSurfaceRelative`:
-
-```csharp
-planetRel = base.transform.TransformPoint(vertRel);
-buildQuad.verts[vertexIndex] = buildQuad.transform.InverseTransformPoint(planetRel);
-```
-
-The first line takes the vertex from the centre of the body to the world, through the matrix of the
-terrain sphere: its result depends on `vertRel` and on that matrix, not on the quad's `Transform`. The
-second line expresses that world position relative to the quad's own `Transform`, as rounded. Read
-alone, this says that two quads built in the same frame of the sphere put a vertex they share on the
-same point. [The measurements](the-measurements-seam.md) say they do not: the vertices are apart at
-every load.
-
-Part of the gap comes before those two lines, from `vertRel` itself. Its direction from the centre of
-the body is computed in `PQS.BuildQuad`, in float, through the matrix of the quad being built:
-
-```csharp
-vbData.globalV = buildQuad.quadMatrix.MultiplyPoint3x4(cacheVerts[vertexIndex]);
-vbData.directionFromCenter = vbData.globalV.normalized;
-```
-
-The two quads of a seam reach a vertex they share through two different matrices, and the two
-directions can differ by the precision of a float, about 6 × 10⁻⁸: some 0.4 m along the ground at the
-radius of Earth, some 40 mm at the radius of Kerbin. That is the order of what the measurements give
-beside the coarser vertex. Most of the gap is vertical, though, the finer quad above or below the
-coarser one: about twice what it is beside on Earth, and several times more on Kerbin. Where that part
-comes from has not been traced.
-
-The matrix of the terrain sphere does not stay put either. Its position and rotation are held in float
-numbers, far from the origin of the world, and it changes when the origin of the world moves, or when
-the sphere turns; two quads built before and after such a change do not round the vertex they share
-the same way. That matrix keeps changing, at every load and during a flight, and is never put back
-where it was: [KSP Diag - Floating Origin](https://github.com/lhervier/KSP-Diag-FloatingOrigin) records it
-([at every load](https://github.com/lhervier/KSP-Diag-FloatingOrigin/blob/main/docs/what-the-measurements-show-loading.md),
-[during a flight](https://github.com/lhervier/KSP-Diag-FloatingOrigin/blob/main/docs/what-the-measurements-show-rotating-frame.md)).
 
 ## The drawing
 
@@ -84,7 +37,7 @@ terrain:
 - **in green**, the triangles the finer quad has along that side, as the game draws them at that moment;
 - **in red**, the triangles the coarser quad has along the side that faces it;
 - **a yellow vertical line**, 1 km tall, rising from the shared vertex where the two quads are furthest
-  apart: the one the log talks about.
+  apart: the one the window talks about.
 
 Each triangle is filled, see-through, and outlined in a darker shade of the same colour, one pixel wide.
 The drawing ignores the depth of the terrain: it stays visible behind a hill, and every vertex is drawn
@@ -104,46 +57,53 @@ of the zone of the highest level and looking back towards the craft.*
 
 **Three buttons** in the mod's window choose the mode: everything, the yellow line only, nothing. The
 triangles cover the ground they are drawn on; the yellow line alone shows where to look while leaving the
-ground itself in sight. The button of the mode in force is greyed out, and the window also shows the last
-line of log; `Alt+F6` hides the window. The choice is kept across scene changes and reloads, and measuring
-and logging go on whatever it is.
+ground itself in sight. The button of the mode in force is greyed out; `Alt+F6` hides the window. The
+choice is kept across scene changes and reloads, and measuring goes on whatever it is.
 
-## The log
+## The reading
 
-Each time the seams change, and at most once a second, `KSP.log` gets a line of this form, prefixed with
-`[Diag-TerrainQuads]`:
+Under its buttons, the window shows what the seams are at that moment, measured again four times a
+second and right after every shift of the origin of the world:
 
 ```
-<n> seam(s) between <n> quad(s) of level <level> and <n> coarser one(s); <n> shared vertices, gap mean <gap> mm, max <gap> mm; largest on <quad> (<side>, level <level>) against <quad> (<side>, level <level>), where the finer quad is <gap> mm above|below the coarser one and <gap> mm beside it, <distance> km from the active vessel
+<body>, highest level <level>, <n> vertices along a side of a quad
+<n> seam(s) between <n> quad(s) of level <level> and <n> coarser one(s), <n> shared vertices
+Gap: mean <gap> mm, max <gap> mm
+Largest gap: the finer quad <gap> mm above|below the coarser one, <gap> mm beside it
+At <latitude>° lat, <longitude>° lon, <height> m above sea level|under the sea; <distance> km from the vessel, heading <heading>°
+On <quad> (<side>, level <level>) against <quad> (<side>, level <level>)
 ```
 
+- **Highest level**: the subdivision level of the finest quads of the body, the ones around the craft.
 - **Shared vertices**: along a side it has changed, the finer quad keeps one vertex in two, and each of
   them should land on a vertex of the coarser quad. The mod pairs each one with the nearest vertex of
   the coarser side.
 - **Gap**: the distance between the two vertices of a pair, averaged over all pairs, and the largest
   one. Both vertices are taken through the matrix their quad is drawn with, and the distance is computed
   in double precision: it is the distance between the two places the game puts them.
-- **Largest on**: the two quads and sides of the largest gap; the yellow line rises from its vertex.
 - **Above, below, beside**: that largest gap split along the vertical of the body at the vertex. The
   vertical part is a step in the ground; the part beside it is a crack or an overlap, which hardly shows
   from above.
-- **Distance**: how far that vertex is from the active vessel.
-- **Vertices with no counterpart**, when there are any: a vertex of the finer side further than a
-  quarter of the coarser side's spacing from every vertex of it. This should never appear; if it does,
-  the mod has misread the grid, and its gaps should not be trusted.
+- **At**: where that vertex is, whether the sea covers it, and how far and in which direction it lies
+  from the active vessel, the heading counted from north towards east. The yellow line rises from it.
+- **On**: the two quads and sides of the largest gap.
+- **Vertices with no counterpart**, after the gaps when there are any: a vertex of the finer side further
+  than a quarter of the coarser side's spacing from every vertex of it. This should never appear; if it
+  does, the mod has misread the grid, and its gaps should not be trusted.
 
-A line is also written right after every shift of the origin of the world, whatever it shows, prefixed
-with `after an origin shift:`, and one each time a button changes the mode.
+After a load, the figures change for a second or two while the game builds the quads around the craft,
+then stay put as long as nothing moves: the reading of that load is the one they settle on.
 
-The first lines of a flight say which shader the drawing got (`Hidden/Internal-Colored`, and whether its
-depth test could be turned off), then the body, its radius, its highest subdivision level and the number
-of vertices along a side of a quad.
+The mod writes none of this anywhere by itself. To keep a reading, press *Log*: it goes to a file, with
+the time and where the craft is ([The Log button](#the-log-button)). In `KSP.log`, the mod writes only
+an error if the drawing cannot be made, and one line each time *Log* is pressed, saying where it wrote.
 
 ## The Log button
 
-The *Log* button, under the line of log in the window, writes where every vertex of the terrain is at
-that moment: for each quad of the highest level, shown or not, and for each coarser quad against one of
-them, the distance from the centre of the body to each of its vertices. It goes to two files, created at
+The *Log* button, under the reading in the window, writes that reading, and where every vertex of the
+terrain is at that moment: for each quad of the highest level, shown or not, and for each coarser quad
+against one of them, the distance from the centre of the body to each of its vertices. It goes to two
+files, created at
 the first *Log* of a run of KSP in `GameData/KSPDiagTerrainQuads/PluginData/`, named after the time they
 are created, each *Log* adding its lines to them. Columns are separated by `;`, and numbers written with
 `.` as their decimal separator: a spreadsheet opens them once told so.
@@ -161,6 +121,15 @@ are created, each *Log* adding its lines to them. Columns are separated by `;`, 
 | Krakensbane (m/s) | the speed the game takes off the craft and gives the world instead, 0 when it does not |
 | Origin shifts since previous Log | how many times the floating origin was moved since the previous *Log* |
 | Quads | how many lines this *Log* added to the other file |
+| Level, Seams, Finer quads, Coarser quads, Shared vertices, Vertices with no counterpart | the second line of the reading, and the count of vertices with no counterpart, 0 when there are none |
+| Gap mean (mm), Gap max (mm) | the gaps of the reading |
+| Finer quad at largest gap, Step (mm), Beside (mm) | the largest gap: `above` or `below`, its vertical part and the part beside it |
+| Largest gap latitude, longitude, altitude (m), under the sea | where its vertex is, and `yes` when the sea covers it |
+| Largest gap from vessel (km), heading from vessel | how far it lies from the active craft, and in which direction, in degrees from north towards east |
+| Finer quad, Finer side, Coarser quad, Coarser side, Coarser level | the two quads and sides of the largest gap |
+
+The columns of the largest gap are left empty when no vertex is shared. The figures are those of the
+window, with all their digits.
 
 `quads-<date>.csv` gets one line per quad, for each *Log*:
 

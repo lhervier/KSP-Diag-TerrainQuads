@@ -11,10 +11,11 @@ namespace com.github.lhervier.ksp.diag.terrainquads
     /// side they share: green for the finer quad, red for the coarser one, filled and outlined. A yellow
     /// vertical line rises from the shared vertex where the two quads are furthest apart. The drawing
     /// shows through the terrain; the buttons of a small window choose between all of it, the yellow line
-    /// only, and nothing, and Mod+F6 shows or hides that window. Each time the seams change, the log gets a
-    /// line saying how far apart the two quads put the vertices they share. The Log button of the window
-    /// writes to two CSV files the distance from the centre of the body to every vertex of every quad of the
-    /// highest level, and of the coarser quads against them (see <see cref="VertexLog"/>).
+    /// only, and nothing, and Mod+F6 shows or hides that window. The window also shows how far apart the two
+    /// quads put the vertices they share (see <see cref="SeamReading"/>). Nothing is written unless the
+    /// tester asks: the Log button of the window writes that reading to a CSV file, and to another the
+    /// distance from the centre of the body to every vertex of every quad of the highest level, and of the
+    /// coarser quads against them (see <see cref="VertexLog"/>).
     /// </summary>
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class KSPDiagTerrainQuads : MonoBehaviour
@@ -28,13 +29,6 @@ namespace com.github.lhervier.ksp.diag.terrainquads
         // How often the quads are looked at again, in seconds of real time. The drawing itself follows
         // the quads every frame.
         private const float REFRESH_PERIOD = 0.25f;
-
-        // At most one line of log per this many seconds of real time, unless the origin of the world
-        // has just been shifted.
-        private const float LOG_PERIOD = 1f;
-
-        // Change in the largest gap, in metres, below which a new line of log is not worth it.
-        private const double LOG_GAP_CHANGE = 0.00001;
 
         private static readonly Color FINE_FILL = new Color(0f, 1f, 0f, 0.25f);
         private static readonly Color FINE_LINE = new Color(0f, 0.45f, 0f, 1f);
@@ -58,7 +52,7 @@ namespace com.github.lhervier.ksp.diag.terrainquads
         private static readonly KeyBinding WINDOW_KEY = new KeyBinding(KeyCode.F6);
         private const int WINDOW_ID = 0x47485004;
 
-        /// <summary>What is drawn. Measuring and logging go on whatever is chosen.</summary>
+        /// <summary>What is drawn. Measuring goes on whatever is chosen.</summary>
         internal enum Display
         {
             Everything,
@@ -79,16 +73,16 @@ namespace com.github.lhervier.ksp.diag.terrainquads
 
         private static Rect windowRect = new Rect(60f, 60f, 520f, 0f);
 
-        // The last line of log, shown in the window too, and whether it followed a shift of the origin.
-        private string lastLine = "";
-        private bool lastAfterShift;
-
         private CelestialBody body;
         private PQS sphere;
         private readonly WorstMarker marker = new WorstMarker();
 
         // The seam with the largest gap, at the last refresh; null when no vertex was matched.
         private Seam worst;
+
+        // What the seams showed at the last refresh; null while the active vessel's body has no terrain.
+        private SeamReading reading;
+
         private readonly Dictionary<PQ, EdgeOverlay> fineOverlays = new Dictionary<PQ, EdgeOverlay>();
         private readonly Dictionary<PQ, EdgeOverlay> coarseOverlays = new Dictionary<PQ, EdgeOverlay>();
         private readonly List<Seam> seams = new List<Seam>();
@@ -98,14 +92,6 @@ namespace com.github.lhervier.ksp.diag.terrainquads
         private readonly List<PQ> leaves = new List<PQ>();
         private readonly Dictionary<PQ, int> fineSides = new Dictionary<PQ, int>();
         private readonly Dictionary<PQ, int> coarseSides = new Dictionary<PQ, int>();
-
-        // What the last line of log said, to write a new one only when it changes.
-        private int loggedSeams = -1;
-        private int loggedFine = -1;
-        private int loggedCoarse = -1;
-        private double loggedMaxGap = -1.0;
-        private float nextLog;
-        private bool originShifted;
 
         // Shifts of the origin since the last Log, and what the window says of that Log.
         private int shiftsSinceLog;
@@ -126,10 +112,13 @@ namespace com.github.lhervier.ksp.diag.terrainquads
             coarseLine = MakeMaterial(shader, COARSE_LINE, LINE_QUEUE);
             markerLine = MakeMaterial(shader, MARKER, MARKER_QUEUE);
 
-            // Shader.Find answers with whatever carries the name: say what was found, and whether the depth
-            // test really is a property of it, since without one the terrain hides the drawing.
-            Debug.Log(LOG_PREFIX + "shader " + shader.name + ", depth test settable: "
-                + fineFill.HasProperty("_ZTest"));
+            // Shader.Find answers with whatever carries the name: without a depth test to turn off, the
+            // terrain hides the drawing, which the tester should know.
+            if (!fineFill.HasProperty("_ZTest"))
+            {
+                Debug.LogWarning(LOG_PREFIX + "shader " + shader.name
+                    + " has no depth test to turn off: the terrain will hide the drawing");
+            }
 
             // An instance method: EventData refuses a static handler.
             GameEvents.onFloatingOriginShift.Add(OnOriginShift);
@@ -168,8 +157,7 @@ namespace com.github.lhervier.ksp.diag.terrainquads
 
         private void OnOriginShift(Vector3d offset, Vector3d nonFrame)
         {
-            // The quads have just been moved: measure them again at once, and say so whatever it shows.
-            originShifted = true;
+            // The quads have just been moved: measure them again at once.
             nextRefresh = 0f;
             shiftsSinceLog++;
         }
@@ -196,6 +184,9 @@ namespace com.github.lhervier.ksp.diag.terrainquads
                 return;
             }
             GUI.skin = HighLogic.Skin;
+
+            // Laid out anew at every frame, so that the window shrinks when the reading has fewer lines.
+            windowRect.height = 0f;
             windowRect = GUILayout.Window(WINDOW_ID, windowRect, DrawWindow, "KSP Diag - Terrain Quads");
         }
 
@@ -214,7 +205,17 @@ namespace com.github.lhervier.ksp.diag.terrainquads
             }
             GUI.enabled = true;
             GUILayout.EndHorizontal();
-            GUILayout.Label(lastLine);
+            if (reading == null)
+            {
+                GUILayout.Label("No terrain under the active vessel");
+            }
+            else
+            {
+                foreach (string line in reading.Lines())
+                {
+                    GUILayout.Label(line);
+                }
+            }
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Log", GUILayout.ExpandWidth(false)))
             {
@@ -244,7 +245,6 @@ namespace com.github.lhervier.ksp.diag.terrainquads
         internal void SetDisplay(Display choice)
         {
             display = choice;
-            Debug.Log(LOG_PREFIX + "display: " + Describe(choice));
         }
 
         /// <summary>What is drawn.</summary>
@@ -261,16 +261,16 @@ namespace com.github.lhervier.ksp.diag.terrainquads
         }
 
         /// <summary>
-        /// Writes a Log of the quads as they are now, as the Log button does: every quad of the highest
-        /// level, and every coarser quad against one of them. Returns the number of the Log, how many quads
-        /// it holds and the two files it went to, ready to be written as JSON; throws when the active
-        /// vessel's body has no terrain.
+        /// Writes a Log as the Log button does: the reading of the seams as the window shows it, and the
+        /// quads as they are now, every quad of the highest level and every coarser quad against one of
+        /// them. Returns the number of the Log, how many quads it holds and the two files it went to, ready
+        /// to be written as JSON; throws when the active vessel's body has no terrain.
         /// </summary>
         internal Dictionary<string, object> LogVertices()
         {
             // Measured again first, so that the Log holds the quads of this very frame.
             Refresh();
-            if (sphere == null || sphere.quads == null)
+            if (reading == null)
             {
                 throw new InvalidOperationException("the body of the active vessel has no terrain");
             }
@@ -291,7 +291,7 @@ namespace com.github.lhervier.ksp.diag.terrainquads
             }
 
             int shifts = shiftsSinceLog;
-            int log = VertexLog.Write(body, quads, shifts);
+            int log = VertexLog.Write(body, reading, quads, shifts);
             shiftsSinceLog = 0;
             lastVertexLog = "Log " + log + ": " + quads.Count + " quad(s), " + shifts + " origin shift(s) since the previous one";
             Debug.Log(LOG_PREFIX + lastVertexLog + ", written to " + VertexLog.LogsPath + " and " + VertexLog.QuadsPath);
@@ -306,60 +306,12 @@ namespace com.github.lhervier.ksp.diag.terrainquads
         }
 
         /// <summary>
-        /// The seams as last measured, ready to be written as JSON: their count, the last line of log and
-        /// whether it followed a shift of the origin, and for the largest gap where its vertex lies
-        /// (latitude, longitude, height above sea level, whether the sea covers it), which quad stands
-        /// above the other and by how much, and where it lies from the active vessel (distance, heading).
+        /// The seams as last measured, as the window shows them, ready to be written as JSON (see
+        /// <see cref="SeamReading.ToJson"/>); empty while the active vessel's body has no terrain.
         /// </summary>
         internal Dictionary<string, object> Reading()
         {
-            Dictionary<string, object> reading = new Dictionary<string, object>
-            {
-                { "seams", seams.Count },
-                { "lastLog", lastLine },
-                { "lastLogAfterOriginShift", lastAfterShift }
-            };
-            if (worst == null || body == null)
-            {
-                return reading;
-            }
-            Vector3d position = worst.WorstPosition;
-            Vector3d up = (position - body.position).normalized;
-            double vertical = Vector3d.Dot(worst.WorstGap, up);
-            double altitude = body.GetAltitude(position);
-            double latitude = body.GetLatitude(position);
-            double longitude = body.GetLongitude(position);
-            Dictionary<string, object> largest = new Dictionary<string, object>
-            {
-                { "latitude", latitude },
-                { "longitude", longitude },
-                { "altitude", altitude },
-                { "underSea", body.ocean && altitude < 0.0 },
-                { "gapMm", worst.MaxGap * 1000.0 },
-                { "verticalMm", Math.Abs(vertical) * 1000.0 },
-                { "horizontalMm", (worst.WorstGap - up * vertical).magnitude * 1000.0 },
-                { "finerAbove", vertical >= 0.0 }
-            };
-            Vessel active = FlightGlobals.ActiveVessel;
-            if (active != null)
-            {
-                largest["distanceKm"] = (position - (Vector3d)active.transform.position).magnitude / 1000.0;
-                largest["headingFromVessel"] = Bearing(active.latitude, active.longitude, latitude, longitude);
-            }
-            reading["largest"] = largest;
-            return reading;
-        }
-
-        /// <summary>The initial bearing, in degrees from north towards east, of the great circle from one
-        /// point to another.</summary>
-        private static double Bearing(double lat1, double lon1, double lat2, double lon2)
-        {
-            double f1 = lat1 * Math.PI / 180.0;
-            double f2 = lat2 * Math.PI / 180.0;
-            double dl = (lon2 - lon1) * Math.PI / 180.0;
-            double y = Math.Sin(dl) * Math.Cos(f2);
-            double x = Math.Cos(f1) * Math.Sin(f2) - Math.Sin(f1) * Math.Cos(f2) * Math.Cos(dl);
-            return (Math.Atan2(y, x) * 180.0 / Math.PI + 360.0) % 360.0;
+            return reading != null ? reading.ToJson() : new Dictionary<string, object>();
         }
 
         private void LateUpdate()
@@ -383,7 +335,7 @@ namespace com.github.lhervier.ksp.diag.terrainquads
 
         /// <summary>
         /// Finds the seams of the active vessel's body as they are now, brings the drawing in line with
-        /// them, measures them, and logs the result when it has changed.
+        /// them, and measures them.
         /// </summary>
         private void Refresh()
         {
@@ -393,12 +345,6 @@ namespace com.github.lhervier.ksp.diag.terrainquads
             {
                 Clear();
                 sphere = current;
-                if (sphere != null)
-                {
-                    Debug.Log(LOG_PREFIX + "body " + body.bodyName + ", radius " + sphere.radius.ToString("F0")
-                        + " m, highest subdivision level " + sphere.maxLevel + ", " + QuadGrid.SideVertices
-                        + " vertices by side");
-                }
             }
             if (sphere == null || sphere.quads == null)
             {
@@ -418,7 +364,7 @@ namespace com.github.lhervier.ksp.diag.terrainquads
                 }
             }
             marker.PointAt(worst?.Fine, worst != null ? worst.WorstVertex : 0);
-            LogIfChanged();
+            reading = new SeamReading(body, sphere, seams, fineOverlays.Count, coarseOverlays.Count, worst);
         }
 
         /// <summary>
@@ -538,84 +484,8 @@ namespace com.github.lhervier.ksp.diag.terrainquads
             coarseOverlays.Clear();
             seams.Clear();
             worst = null;
+            reading = null;
             marker.PointAt(null, 0);
-            loggedSeams = -1;
-        }
-
-        /// <summary>
-        /// Writes one line of log about the seams, when they have changed since the last one, or when the
-        /// origin of the world has just been shifted.
-        /// </summary>
-        private void LogIfChanged()
-        {
-            int matched = 0;
-            int unmatched = 0;
-            double sum = 0.0;
-            foreach (Seam seam in seams)
-            {
-                matched += seam.Matched;
-                unmatched += seam.Unmatched;
-                sum += seam.SumGap;
-            }
-            double maxGap = worst != null ? worst.MaxGap : 0.0;
-
-            bool changed = seams.Count != loggedSeams
-                || fineOverlays.Count != loggedFine
-                || coarseOverlays.Count != loggedCoarse
-                || System.Math.Abs(maxGap - loggedMaxGap) > LOG_GAP_CHANGE;
-            if (!originShifted && (!changed || Time.unscaledTime < nextLog))
-            {
-                return;
-            }
-
-            string line = (originShifted ? "after an origin shift: " : "")
-                + seams.Count + " seam(s) between " + fineOverlays.Count + " quad(s) of level " + sphere.maxLevel
-                + " and " + coarseOverlays.Count + " coarser one(s); " + matched + " shared vertices";
-            if (matched > 0)
-            {
-                line += ", gap mean " + FormatMm(sum / matched) + ", max " + FormatMm(maxGap);
-            }
-            if (unmatched > 0)
-            {
-                line += "; " + unmatched + " vertices with no counterpart";
-            }
-            if (worst != null)
-            {
-                line += "; largest on " + worst.Fine.name + " (" + worst.FineSide + ", level "
-                    + worst.Fine.subdivision + ") against " + worst.Coarse.name + " (" + worst.CoarseSide
-                    + ", level " + worst.Coarse.subdivision + ")";
-
-                // Split along the vertical of the body at that vertex: a vertical gap is a step in the
-                // ground, a horizontal one a crack or an overlap.
-                Vector3d up = (worst.WorstPosition - body.position).normalized;
-                double vertical = Vector3d.Dot(worst.WorstGap, up);
-                double horizontal = (worst.WorstGap - up * vertical).magnitude;
-                line += ", where the finer quad is " + FormatMm(System.Math.Abs(vertical))
-                    + (vertical >= 0.0 ? " above" : " below") + " the coarser one and " + FormatMm(horizontal)
-                    + " beside it";
-
-                Vessel active = FlightGlobals.ActiveVessel;
-                if (active != null)
-                {
-                    double distance = (worst.WorstPosition - (Vector3d)active.transform.position).magnitude;
-                    line += ", " + (distance / 1000.0).ToString("F1") + " km from the active vessel";
-                }
-            }
-            Debug.Log(LOG_PREFIX + line);
-            lastLine = line;
-            lastAfterShift = originShifted;
-
-            loggedSeams = seams.Count;
-            loggedFine = fineOverlays.Count;
-            loggedCoarse = coarseOverlays.Count;
-            loggedMaxGap = maxGap;
-            nextLog = Time.unscaledTime + LOG_PERIOD;
-            originShifted = false;
-        }
-
-        private static string FormatMm(double metres)
-        {
-            return (metres * 1000.0).ToString("F3") + " mm";
         }
     }
 }

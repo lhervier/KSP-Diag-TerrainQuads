@@ -12,16 +12,16 @@ A viewing and measuring instrument for KSP 1.12, for the quads the terrain is bu
 draws over the terrain the seam where the quads of the highest subdivision level meet coarser quads:
 the triangles each of the two quads has along the edge they share, green for the finer quad, red for
 the coarser one, and a yellow line where the two are furthest apart. The drawing shows through the
-hills, so the whole seam can be followed from far away. It also writes to the log how far apart the
-two quads put the vertices they share, and, at the press of a button, where every vertex of every quad
-around the craft is, so that a quad can be followed from one press to the next and compared with its
-neighbours.
+hills, so the whole seam can be followed from far away. Its window shows how far apart the two quads
+put the vertices they share, and, at the press of a button, the mod writes that reading to a file along
+with where every vertex of every quad around the craft is, so that a quad can be followed from one press
+to the next and compared with its neighbours.
 
 ## What it shows
 
 Where quads of the highest level meet coarser ones, the mod draws the triangles of both along the seam,
-marks with a yellow line where they are furthest apart, and logs the gaps. Its *Log* button writes how
-far every vertex around the craft is from the centre of the body.
+marks with a yellow line where they are furthest apart, and shows the gaps in its window. Its *Log*
+button writes those gaps, and how far every vertex around the craft is from the centre of the body.
 
 ![The drawing seen from 10 km above a landed capsule: a green band inside, a red band outside, all around the zone of the highest level](imgs/drawing-kerbin.png)
 
@@ -33,25 +33,16 @@ the camera pulled back 10 km from it.*
 ## Taking a reading
 
 The drawing is there in every flight: fly, or land, and look at the terrain around the craft. The
-buttons of the window switch between the whole drawing, the yellow line alone, and nothing; the lines the
-mod writes to `KSP.log` give the gaps of the seam, as numbers.
+buttons of the window switch between the whole drawing, the yellow line alone, and nothing; under them,
+the window gives the gaps of the seam, as numbers. The mod writes nothing by itself: press *Log* to keep
+what the window shows.
 
 The *Log* button writes two files, in `GameData/KSPDiagTerrainQuads/PluginData/`: copy them somewhere
 before starting KSP again, which starts a new pair at its first *Log*. Both are plain text and open in
 any spreadsheet: import them as text, with `;` as the separator of columns and `.` as the decimal
-separator. Each line of the file of quads is one quad at one *Log*: filtering on its name follows a quad
-from one *Log* to the next, and filtering on a *Log* gives the terrain at that moment.
-
-## The seam between subdivision levels
-
-Played by a script through [KSP-MCPServer](https://github.com/lhervier/KSP-MCPServer), on Real Solar
-System and on stock KSP. A craft on the launchpad, reverted to launch until the log says the finer quad is above the coarser one
-at the largest gap; then two screenshots from just past the yellow line, one with the line only, one
-with the triangles. The largest gap of a load went from 0.76 m to 2.82 m on Earth, over 79 loads, and
-from 118 mm to 312 mm on Kerbin, over seven: the seam is open, and shows as a crack on both, though it
-takes looking for.
-
-**→ [The protocol](docs/the-protocol-seam.md) · [The measurements](docs/the-measurements-seam.md) · [What they show](docs/what-the-measurements-show-seam.md)**
+separator. Each line of the file of Logs is one press, with the reading of the window at that moment.
+Each line of the file of quads is one quad at one *Log*: filtering on its name follows a quad from one
+*Log* to the next, and filtering on a *Log* gives the terrain at that moment.
 
 ## Get it
 
@@ -73,8 +64,8 @@ Drop `GameData/KSPDiagTerrainQuads` into the `GameData` of KSP, so that you end 
 no Harmony, no ModuleManager, no dependency of any kind.
 
 The drawing is there in every flight, the window's *nothing* hides it, and `Alt+F6` hides the window. The mod reads the terrain
-and writes nothing but its lines in `KSP.log`, and the two files of its *Log* button in its own
-`PluginData` folder; your saves are never touched. Removing the folder removes
+and writes nothing but the two files of its *Log* button, in its own `PluginData` folder, and a line in
+`KSP.log` at each press; your saves are never touched. Removing the folder removes
 the mod.
 
 ## License
