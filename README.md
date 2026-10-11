@@ -2,6 +2,12 @@
 
 **⚠️ Work in progress.** This is an active investigation, not a finished mod. The code and this page can still change, and several questions are still open.
 
+**How this was made.** Written with Claude, Anthropic's AI assistant, and reviewed line by line by a
+human — me. I am saying so up front, because contributions made with an AI deserve a closer look than
+others, and because some people would rather stop reading here. That look is easy to give here: this
+mod changes nothing in the game, it only reads the vertices and triangles the game already holds for
+each quad, and the source is a few hundred lines with no dependency of any kind.
+
 A viewing and measuring instrument for KSP 1.12, for the quads the terrain is built of. In flight, it
 draws over the terrain the seam where the quads of the highest subdivision level meet coarser quads:
 the triangles each of the two quads has along the edge they share, green for the finer quad, red for
@@ -10,12 +16,6 @@ hills, so the whole seam can be followed from far away. It also writes to the lo
 two quads put the vertices they share, and, at the press of a button, where every vertex of every quad
 around the craft is, so that a quad can be followed from one press to the next and compared with its
 neighbours.
-
-**How this was made.** Written with Claude, Anthropic's AI assistant, and reviewed line by line by a
-human — me. I am saying so up front, because contributions made with an AI deserve a closer look than
-others, and because some people would rather stop reading here. That look is easy to give here: this
-mod changes nothing in the game, it only reads the vertices and triangles the game already holds for
-each quad, and the source is a few hundred lines with no dependency of any kind.
 
 ## What it shows
 

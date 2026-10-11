@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="760" height="250" viewBox="0 0 760 250" font-family="Helvetica, Arial, sans-serif">
 <rect width="760" height="250" fill="#ffffff"/>
 <line x1="380" y1="54" x2="380" y2="165" stroke="#cccccc" stroke-width="1" stroke-dasharray="3 4"/>
-<polyline points="40.0,85.9 125.0,79.8 210.0,92.5 295.0,117.3 380.0,97.8" fill="none" stroke="#1f5bc4" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="40.0,85.9 125.0,79.8 210.0,92.5 295.0,117.3 366.0,97.8" fill="none" stroke="#1f5bc4" stroke-width="3" stroke-linejoin="round"/>
 <circle cx="40.0" cy="85.9" r="3.6" fill="#1f5bc4"/>
 <circle cx="125.0" cy="79.8" r="3.6" fill="#1f5bc4"/>
 <circle cx="210.0" cy="92.5" r="3.6" fill="#1f5bc4"/>
 <circle cx="295.0" cy="117.3" r="3.6" fill="#1f5bc4"/>
-<circle cx="380.0" cy="97.8" r="3.6" fill="#1f5bc4"/>
-<polyline points="380.0,127.8 422.5,126.8 465.0,123.9 507.5,111.6 550.0,101.2 592.5,108.3 635.0,127.5 677.5,139.5 720.0,137.5" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="380.0" cy="127.8" r="3.6" fill="#1a1a1a"/>
+<circle cx="366.0" cy="97.8" r="3.6" fill="#1f5bc4"/>
+<polyline points="396.0,127.8 422.5,126.8 465.0,123.9 507.5,111.6 550.0,101.2 592.5,108.3 635.0,127.5 677.5,139.5 720.0,137.5" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="396.0" cy="127.8" r="3.6" fill="#1a1a1a"/>
 <circle cx="422.5" cy="126.8" r="3.6" fill="#1a1a1a"/>
 <circle cx="465.0" cy="123.9" r="3.6" fill="#1a1a1a"/>
 <circle cx="507.5" cy="111.6" r="3.6" fill="#1a1a1a"/>
@@ -19,10 +19,10 @@
 <circle cx="720.0" cy="137.5" r="3.6" fill="#1a1a1a"/>
 <text x="40.0" y="55.0" fill="#1f5bc4" font-size="13" text-anchor="start" font-weight="normal">a quad one level coarser</text>
 <text x="720.0" y="55.0" fill="#1a1a1a" font-size="13" text-anchor="end" font-weight="normal">a quad of the highest level</text>
-<line x1="366.0" y1="99.8" x2="366.0" y2="125.8" stroke="#d32f2f" stroke-width="2"/>
-<polygon points="366.0,99.8 361.0,107.8 371.0,107.8" fill="#d32f2f"/>
-<polygon points="366.0,125.8 361.0,117.8 371.0,117.8" fill="#d32f2f"/>
-<text x="356.0" y="117.8" fill="#d32f2f" font-size="14" text-anchor="end" font-weight="bold">step</text>
+<line x1="369.5" y1="101.3" x2="392.5" y2="124.3" stroke="#d32f2f" stroke-width="2"/>
+<polygon points="369.5,101.3 371.6,110.5 378.7,103.5" fill="#d32f2f"/>
+<polygon points="392.5,124.3 383.3,122.2 390.4,115.1" fill="#d32f2f"/>
+<text x="368.0" y="126.0" fill="#d32f2f" font-size="14" text-anchor="end" font-weight="bold">step</text>
 <text x="40.0" y="187.0" fill="#1a1a1a" font-size="14" text-anchor="start" font-weight="normal">The two quads do not put the vertex they share at the same place:</text>
 <text x="40.0" y="207.0" fill="#1a1a1a" font-size="14" text-anchor="start" font-weight="normal">the difference is left at the edge, as a step and a crack.</text>
 <text x="720.0" y="240.0" fill="#555555" font-size="13" text-anchor="end" font-weight="normal">Side view across the edge; heights and step exaggerated.</text>
