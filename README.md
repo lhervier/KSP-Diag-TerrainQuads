@@ -36,15 +36,22 @@ the camera pulled back 10 km from it.*
 
 **→ Full chapter: [What it shows](docs/what-it-shows.md)**
 
-## The situations
+## Taking a reading
 
-Each situation below comes with its protocol, its measurements and what they show. Every protocol is
-played by a script through [KSP-MCPServer](https://github.com/lhervier/KSP-MCPServer), on Real Solar
-System and on stock KSP.
+The drawing is there in every flight: fly, or land, and look at the terrain around the craft. The
+buttons of the window switch between the whole drawing, the yellow line alone, and nothing; the lines the
+mod writes to `KSP.log` give the gaps of the seam, as numbers.
+
+The *Log* button writes two files, in `GameData/KSPDiagTerrainQuads/PluginData/`: copy them somewhere
+before starting KSP again, which starts a new pair at its first *Log*. Both are plain text and open in
+any spreadsheet: import them as text, with `;` as the separator of columns and `.` as the decimal
+separator. Each line of the file of quads is one quad at one *Log*: filtering on its name follows a quad
+from one *Log* to the next, and filtering on a *Log* gives the terrain at that moment.
 
 ## The seam between subdivision levels
 
-A craft on the launchpad, reverted to launch until the log says the finer quad is above the coarser one
+Played by a script through [KSP-MCPServer](https://github.com/lhervier/KSP-MCPServer), on Real Solar
+System and on stock KSP. A craft on the launchpad, reverted to launch until the log says the finer quad is above the coarser one
 at the largest gap; then two screenshots from just past the yellow line, one with the line only, one
 with the triangles. The largest gap of a load went from 0.76 m to 2.82 m on Earth, over 79 loads, and
 from 118 mm to 312 mm on Kerbin, over seven: the seam is open, and shows as a crack on both, though it
@@ -52,14 +59,14 @@ takes looking for.
 
 **→ [The protocol](docs/the-protocol-seam.md) · [The measurements](docs/the-measurements-seam.md) · [What they show](docs/what-the-measurements-show-seam.md)**
 
-## The quads of the highest level, in flight
+## Measured campaigns
 
-A rocket launched from the launchpad and left to fly until it falls into the sea, with a *Log* about
-once a second, so that each quad of the highest level can be compared with its neighbours. Two
-neighbouring quads built at different moments step by up to 22.5 mm on Kerbin and 289 mm on Earth where
-they meet; two built together, by 0.42 mm and 1.6 mm at most.
-
-**→ [The protocol](docs/the-protocol-flight.md) · [The measurements](docs/the-measurements-flight.md) · [What they show](docs/what-the-measurements-show-flight.md)**
+This instrument reads the quads in the campaigns of
+[Terrain Precision Fix](https://github.com/lhervier/KSP-TerrainPrecisionFix), each played without that
+mod and with it, with its protocol, its saves, its scripts and its logs:
+[the quads of the highest level, in flight](https://github.com/lhervier/KSP-TerrainPrecisionFix/blob/main/docs/checking-the-culprit-flight/the-ground.md), and
+[the seam between subdivision levels](https://github.com/lhervier/KSP-TerrainPrecisionFix/blob/main/docs/limits-and-solutions/stock/the-seam-between-subdivision-levels.md),
+measured again with that mod. The figures read with it are on those pages.
 
 ## Get it
 
