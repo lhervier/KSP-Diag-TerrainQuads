@@ -44,6 +44,20 @@ separator. Each line of the file of Logs is one press, with the reading of the w
 Each line of the file of quads is one quad at one *Log*: filtering on its name follows a quad from one
 *Log* to the next, and filtering on a *Log* gives the terrain at that moment.
 
+## Driving it by script
+
+With [KSP-MCPServer](https://github.com/lhervier/KSP-MCPServer) installed next to it, this mod offers
+its window to a program, as tools of that server: a script presses its buttons and reads what it shows,
+as a player would. Without the server, this mod runs the same.
+
+| tool | what it does |
+|---|---|
+| `terrainquads_read` | reads what the window shows: the body, the highest level, the seams, quads and shared vertices counted, the mean and largest gaps, and where the largest gap lies; empty while the body of the active vessel has no terrain |
+| `terrainquads_log` | presses *Log*: writes a Log and returns its number, the quads written, the shifts of the floating origin since the previous Log, and the two files |
+| `terrainquads_set_display` | chooses what the mod draws, as the buttons of the window do: `everything`, `marker` (the yellow line alone) or `nothing` |
+| `terrainquads_move_window` | moves the window, as dragging it does: `x` and `y` in pixels from the top left corner of the screen; returns its position and size |
+| `terrainquads_show_window` | shows or hides the window, as `Alt+F6` does; the drawing goes on either way |
+
 ## Get it
 
 Either way you end up with the same `GameData/KSPDiagTerrainQuads/` folder.
@@ -52,9 +66,12 @@ Either way you end up with the same `GameData/KSPDiagTerrainQuads/` folder.
 [latest release](https://github.com/lhervier/KSP-Diag-TerrainQuads/releases/latest).
 
 **Or compile it** — clone this repository, set `KSPDIR` to your KSP install folder and run
-`build.bat`. It needs the .NET SDK, takes a few seconds, reads the KSP assemblies straight from your
-install, and puts the DLL in `GameData/KSPDiagTerrainQuads/` inside the repository. It does
-not install anything. Worth doing if you would rather not run a binary you have no source for while
+`build.bat`. It needs the .NET SDK and
+[KSP-MCPServer](https://github.com/lhervier/KSP-MCPServer) installed in that KSP, takes a few seconds,
+reads the KSP assemblies straight from your install, and puts the DLL in
+`GameData/KSPDiagTerrainQuads/` inside the repository. It does not install anything.
+KSP-MCPServer is only needed to compile: it provides the attribute that marks what this mod offers to
+it, and this mod runs the same without it. Worth doing if you would rather not run a binary you have no source for while
 reporting a measurement.
 
 ## Install
