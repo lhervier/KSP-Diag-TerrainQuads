@@ -1,6 +1,6 @@
 Output/
 obj/
-GameData/KSPDiagQuadSeams/*.dll
-GameData/KSPDiagQuadSeams/*.zip
+GameData/KSPDiagTerrainQuads/*.dll
+GameData/KSPDiagTerrainQuads/*.zip
 CLAUDE.md
 __pycache__/
