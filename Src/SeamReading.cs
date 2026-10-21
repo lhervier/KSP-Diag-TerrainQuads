@@ -6,7 +6,7 @@ namespace com.github.lhervier.ksp.diag.terrainquads
     /// <summary>
     /// What the seams of a body show at one refresh: how many there are, between how many quads, how far
     /// apart the two quads put the vertices they share, and where the largest gap is. The window shows it,
-    /// KSP-MCPServer reads it, and the Log button writes it to its file of Logs: the three always say the
+    /// KSP-Util-MCPServer reads it, and the Log button writes it to its file of Logs: the three always say the
     /// same thing.
     /// </summary>
     internal sealed class SeamReading

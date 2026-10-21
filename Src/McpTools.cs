@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using com.github.lhervier.ksp.mcpserver;
+using com.github.lhervier.ksp.util.mcpserver;
 
 namespace com.github.lhervier.ksp.diag.terrainquads
 {
     /// <summary>
-    /// What KSP-MCPServer, when it is installed, offers of this mod as tools: the reading of the largest gap,
+    /// What KSP-Util-MCPServer, when it is installed, offers of this mod as tools: the reading of the largest gap,
     /// the buttons that choose what is drawn, and the moving of the window. Each method works on the mod
     /// loaded in the flight scene. Nothing here is needed to play by hand, and this mod runs the same without
-    /// KSP-MCPServer: only that server reads the attribute.
+    /// KSP-Util-MCPServer: only that server reads the attribute.
     /// </summary>
     internal static class McpTools
     {
