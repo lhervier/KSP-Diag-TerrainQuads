@@ -14,22 +14,18 @@ namespace com.github.lhervier.ksp.diag.terrainquads
     internal static class McpTools
     {
         [McpTool("terrainquads_read",
-            "Reads KSP Diag - Terrain Quads, as its window shows it: body, level (the highest), sideVertices, seams, " +
-                "fineQuads, coarseQuads, sharedVertices, noCounterpart, meanGapMm, maxGapMm, and for the largest gap " +
-                "gapMm, verticalMm, finerAbove (whether the finer quad stands above the coarser one), horizontalMm, " +
-                "the latitude, longitude, height above sea level (altitude) and underSea of its vertex, fineQuad, " +
-                "fineSide, coarseQuad, coarseSide, coarseLevel, distanceKm and headingFromVessel from the active " +
-                "vessel. Empty while the body of the active vessel has no terrain.")]
+            "Reads KSP Diag - Terrain Quads as its window shows it: body, highest level, seam counts, mean and " +
+            "largest gap, and for the largest its vertical and horizontal parts, vertex position, quads and " +
+            "sides, and distance and heading from the vessel. Empty without terrain.")]
         internal static object Read()
         {
             return Mod().Reading();
         }
 
         [McpTool("terrainquads_log",
-            "Writes a Log of KSP Diag - Terrain Quads, as its Log button does: one line in its file of Logs, and one " +
-                "line per quad of the highest level, and per coarser quad against one of them, with the distance " +
-                "from the centre of the body to each of its vertices in millimetres. Returns the number of the Log, " +
-                "quads, originShifts (since the previous Log), logsFile and quadsFile.")]
+            "Writes a Log of KSP Diag - Terrain Quads, as its Log button does: a line in its Logs file and the " +
+            "distance to the body's centre of every vertex of the highest-level quads and their coarser " +
+            "neighbours. Returns the Log number, counts and the files.")]
         internal static object Log()
         {
             return Mod().LogVertices();
